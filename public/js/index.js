@@ -4,6 +4,7 @@ if(!PIXI.utils.isWebGLSupported()){
 }
 
 PIXI.utils.sayHello(type)
+PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
 //Create a Pixi Application
 let app = new PIXI.Application();
@@ -64,15 +65,18 @@ function keyboard(value) {
 }
 
 PIXI.loader
-  .add("img/hitcircle.png")
+  .add([
+		"img/hitcircle-red.png",
+		"img/hitcircle-blue.png",
+	])
   .load(setup);
 
-let circles = new PIXI.particles.ParticleContainer();
+let circles = new PIXI.Container();
 
 let enter = keyboard("Enter");
 enter.press = () => {
   let circle = new PIXI.Sprite(
-    PIXI.loader.resources["img/hitcircle.png"].texture
+    PIXI.loader.resources["img/hitcircle-blue.png"].texture
   );
 
 	circle.width = 128;
@@ -80,8 +84,27 @@ enter.press = () => {
 
 	circle.x = window.innerWidth; 
 	circles.addChild(circle);
+
 };
 
+let mapdata;
+let mapcursor = 0;
+$.getJSON("maps/kero.tkm", (map) => {
+	console.log("loaded")
+	mapdata = map.hits;
+});
+
+sounds.load([
+  "maps/kero.mp3"
+]);
+
+let musicStart;
+sounds.whenLoaded = () => {
+	let music = sounds["maps/kero.mp3"];
+	musicStart = performance.now() - 1500;
+	music.play();
+  app.ticker.add(musicStep);
+}
 
 function setup() {
   app.stage.addChild(circles);
@@ -89,10 +112,35 @@ function setup() {
   app.ticker.add(delta => gameLoop(delta));
 }
 
+function musicStep() {
+	const musicTime = performance.now() - musicStart;	
+
+	console.log(mapdata[mapcursor], musicTime);
+	if (mapdata[mapcursor][0] < musicTime) {
+		let tex;
+		if (mapdata[mapcursor][1]) {
+			tex = PIXI.loader.resources["img/hitcircle-blue.png"].texture
+		} else {
+			console.log("RED");
+			tex = PIXI.loader.resources["img/hitcircle-red.png"].texture
+		}
+
+		const circle = new PIXI.Sprite(tex);
+
+		circle.width = 128;
+		circle.height = 128;
+
+		circle.x = window.innerWidth; 
+		circles.addChild(circle);
+	  console.log("added");
+		mapcursor++;
+	}
+}
+
 function gameLoop(delta) {
 	let toDelete = [];
 	for (const circle of circles.children) {
-		circle.x -= 10*delta;
+		circle.x -= 20*delta;
 		if (circle.x < -128) {
 			toDelete.push(circle);		
 		}
