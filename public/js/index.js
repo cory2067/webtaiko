@@ -79,12 +79,12 @@ PIXI.loader
   ])
   .load(setup)
 
-let circles = new PIXI.Container();
+let track, circles;
 
 window.addEventListener("keydown", event => { 
   const row = keymap[event.key]; 
   if (row == 2) {
-    handleHit(circles);
+    track.hit(performance.now() - musicStart);
   }
 }, false);
 
@@ -138,10 +138,15 @@ sounds.whenLoaded = () => {
   let music = sounds["maps/kero.mp3"];
   musicStart = performance.now();
   music.play();
-  app.ticker.add(musicStep);
 }
 
 function setup() {
+  track = new Track("img/hitcircle-blue.png",
+                    "sound/taiko/taiko-normal-hitclap.wav",
+                    0, 1000);
+
+  circles = track.circles;
+
   let target = new PIXI.Sprite(
     PIXI.loader.resources["img/target.png"].texture
   );
@@ -149,8 +154,20 @@ function setup() {
   target.height = 152;
   target.x = 116;
 
-  app.stage.addChild(target);
-  app.stage.addChild(circles);
+  //app.stage.addChild(target);
+  //app.stage.addChild(circles);
+  app.stage.addChild(track.container);
+  app.ticker.add(stepTracks);
+}
+
+function stepTracks() {
+  const musicTime = performance.now() - musicStart;  
+  track.updateCircles(musicTime);
+  
+  while (mapdata[mapcursor][0] - 1500 < musicTime) {
+    track.addCircle(mapdata[mapcursor][0]);
+    mapcursor++;
+  }
 }
 
 function musicStep() {
