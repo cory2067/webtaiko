@@ -66,9 +66,10 @@ function keyboard(value) {
 
 PIXI.loader
   .add([
-		"img/hitcircle-red.png",
-		"img/hitcircle-blue.png",
-	])
+    "img/hitcircle-red.png",
+    "img/target.png",
+    "img/hitcircle-blue.png",
+  ])
   .load(setup);
 
 let circles = new PIXI.Container();
@@ -79,19 +80,19 @@ enter.press = () => {
     PIXI.loader.resources["img/hitcircle-blue.png"].texture
   );
 
-	circle.width = 128;
-	circle.height = 128;
+  circle.width = 128;
+  circle.height = 128;
 
-	circle.x = window.innerWidth; 
-	circles.addChild(circle);
-
+  circle.x = window.innerWidth; 
+  circle.y = 14;
+  circles.addChild(circle);
 };
 
 let mapdata;
 let mapcursor = 0;
 $.getJSON("maps/kero.tkm", (map) => {
-	console.log("loaded")
-	mapdata = map.hits;
+  console.log("loaded")
+  mapdata = map.hits;
 });
 
 sounds.load([
@@ -100,55 +101,59 @@ sounds.load([
 
 let musicStart;
 sounds.whenLoaded = () => {
-	let music = sounds["maps/kero.mp3"];
-	musicStart = performance.now() - 1500;
-	music.play();
+  let music = sounds["maps/kero.mp3"];
+  musicStart = performance.now();
+  music.play();
   app.ticker.add(musicStep);
 }
 
 function setup() {
+  let target = new PIXI.Sprite(
+    PIXI.loader.resources["img/target.png"].texture
+  );
+  target.width = 152;
+  target.height = 152;
+  target.x = 116;
+
+  app.stage.addChild(target);
   app.stage.addChild(circles);
 
-  app.ticker.add(delta => gameLoop(delta));
+  //app.ticker.add(delta => gameLoop(delta));
 }
 
 function musicStep() {
-	const musicTime = performance.now() - musicStart;	
+  const musicTime = performance.now() - musicStart;  
 
-	console.log(mapdata[mapcursor], musicTime);
-	if (mapdata[mapcursor][0] < musicTime) {
-		let tex;
-		if (mapdata[mapcursor][1]) {
-			tex = PIXI.loader.resources["img/hitcircle-blue.png"].texture
-		} else {
-			console.log("RED");
-			tex = PIXI.loader.resources["img/hitcircle-red.png"].texture
-		}
+  while (mapdata[mapcursor][0] - 1500 < musicTime) {
+    let tex;
+    if (mapdata[mapcursor][1]) {
+      tex = PIXI.loader.resources["img/hitcircle-blue.png"].texture
+    } else {
+      tex = PIXI.loader.resources["img/hitcircle-red.png"].texture
+    }
 
-		const circle = new PIXI.Sprite(tex);
+    const circle = new PIXI.Sprite(tex);
 
-		circle.width = 128;
-		circle.height = 128;
+    circle.width = 128;
+    circle.height = 128;
 
-		circle.x = window.innerWidth; 
-		circles.addChild(circle);
-	  console.log("added");
-		mapcursor++;
-	}
-}
+    circle.x = window.innerWidth; 
+    circle.y = 12;
+    circle.hitTime = mapdata[mapcursor][0];
+    circles.addChild(circle);
+    mapcursor++;
+  }
 
-function gameLoop(delta) {
-	let toDelete = [];
-	for (const circle of circles.children) {
-		circle.x -= 20*delta;
-		if (circle.x < -128) {
-			toDelete.push(circle);		
-		}
-  }	
+  let toDelete = [];
+  for (const circle of circles.children) {
+    circle.x = 128 + (128 - window.innerWidth)/1000 * (musicTime - circle.hitTime);
 
-	// avoid removing children while iterating
-	for (const circle of toDelete) {
-		circles.removeChild(circle);
-	}
-
+    if (circle.x < -128) {
+      toDelete.push(circle);
+    }
+  }
+  
+  for (const circle of toDelete) {
+    circles.removeChild(circle);
+  }
 }
