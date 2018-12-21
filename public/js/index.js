@@ -17,6 +17,13 @@ app.renderer.view.style.display = "block";
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
+const keymap = {
+ 1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,0:0,
+ q:1,w:1,e:1,r:1,t:1,y:1,u:1,i:1,o:1,p:1,
+ a:2,s:2,d:2,f:2,g:2,h:2,j:2,k:2,l:2,';':2,
+ z:3,x:3,c:3,v:3,b:3,n:3,m:3,',':3,'.':3,'/':3
+}
+
 function keyboard(value) {
   let key = {};
   key.value = value;
@@ -70,9 +77,17 @@ PIXI.loader
     "img/target.png",
     "img/hitcircle-blue.png",
   ])
-  .load(setup);
+  .load(setup)
 
 let circles = new PIXI.Container();
+
+window.addEventListener("keydown", event => { 
+  const row = keymap[event.key]; 
+  if (row == 2) {
+    handleHit(circles);
+  }
+}, false);
+
 
 let enter = keyboard("Enter");
 enter.press = () => {
@@ -95,8 +110,27 @@ $.getJSON("maps/kero.tkm", (map) => {
   mapdata = map.hits;
 });
 
+function handleHit(cir) {
+  const musicTime = performance.now() - musicStart;  
+
+  //if (musicTime < c.children[0].hitTime
+  const color = cir.children[0].color;
+  cir.removeChildAt(0);
+
+  let hitsound;
+  if (color == 0) {
+    hitsound = sounds["sound/taiko/taiko-normal-hitnormal.wav"];
+  } else {
+    hitsound = sounds["sound/taiko/taiko-normal-hitclap.wav"];
+  }
+  hitsound.play();
+}
+
+
 sounds.load([
-  "maps/kero.mp3"
+  "maps/kero.mp3",
+  "sound/taiko/taiko-normal-hitnormal.wav",
+  "sound/taiko/taiko-normal-hitclap.wav"
 ]);
 
 let musicStart;
@@ -117,13 +151,12 @@ function setup() {
 
   app.stage.addChild(target);
   app.stage.addChild(circles);
-
-  //app.ticker.add(delta => gameLoop(delta));
 }
 
 function musicStep() {
   const musicTime = performance.now() - musicStart;  
 
+  // spawn new hitcircles
   while (mapdata[mapcursor][0] - 1500 < musicTime) {
     let tex;
     if (mapdata[mapcursor][1]) {
@@ -139,11 +172,13 @@ function musicStep() {
 
     circle.x = window.innerWidth; 
     circle.y = 12;
+    circle.color = mapdata[mapcursor][1];
     circle.hitTime = mapdata[mapcursor][0];
     circles.addChild(circle);
     mapcursor++;
   }
 
+  // update positions of existing hitcircles
   let toDelete = [];
   for (const circle of circles.children) {
     circle.x = 128 + (128 - window.innerWidth)/1000 * (musicTime - circle.hitTime);
@@ -152,7 +187,8 @@ function musicStep() {
       toDelete.push(circle);
     }
   }
-  
+ 
+  // despawn old hitcircles 
   for (const circle of toDelete) {
     circles.removeChild(circle);
   }
