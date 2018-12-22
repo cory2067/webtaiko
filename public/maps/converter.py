@@ -1,8 +1,10 @@
 import csv
 import json
 
+NAME = "jbf"
+
 out = {
-        "title": "kero",
+        "title": NAME,
          "tracks": [
             {"color": "red", "sound": "center", "row": 2},
             {"color": "blue", "sound": "rim", "row": 1},
@@ -12,7 +14,7 @@ out = {
          "hits": []
       }
 
-with open("kero.osu") as f:
+with open(NAME + ".osu") as f:
     reader = csv.reader(f)
     for row in reader:
         hitsound = int(row[4])
@@ -23,5 +25,5 @@ with open("kero.osu") as f:
             track = 2 # finish
         out['hits'].append([int(row[2]), track])
 
-with open("kero.tkm", "w") as f:
+with open(NAME + ".tkm", "w") as f:
     f.write(json.dumps(out))

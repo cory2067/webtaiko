@@ -1,3 +1,5 @@
+const MAP = 'jbf';
+
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
   type = "canvas"
@@ -28,13 +30,13 @@ PIXI.loader
 
 
 let mapData;
-$.getJSON("maps/kero.tkm", (map) => {
+$.getJSON(`maps/${MAP}.tkm`, (map) => {
   console.log("loaded tkm");
   mapData = map;
 });
 
 sounds.load([
-  "maps/kero.mp3",
+  `maps/${MAP}.mp3`,
   "sound/hit-center.wav",
   "sound/hit-rim.wav",
   "sound/hit-ride.wav"
@@ -42,7 +44,7 @@ sounds.load([
 
 let gameplay;
 sounds.whenLoaded = () => {
-  gameplay = new Gameplay('maps/kero.mp3', mapData);
+  gameplay = new Gameplay(`maps/${MAP}.mp3`, mapData);
   gameplay.start();
   app.stage.addChild(gameplay.container);
   app.ticker.add(gameplay.updateTracks.bind(gameplay));
