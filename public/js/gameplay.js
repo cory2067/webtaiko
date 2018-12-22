@@ -29,7 +29,7 @@ class Gameplay {
       const trackData = this.map.tracks[i];
       const track = new Track(`img/hitcircle-${trackData.color}.png`,
                               `sound/hit-${trackData.sound}.wav`,
-                              i, this.map.approachTime);
+                              trackData.row, this.map.approachTime);
 
       this.tracks.push(track); 
       this.rowToTrack[trackData.row] = track;
@@ -62,6 +62,7 @@ class Gameplay {
   }
 
   // update all tracks being played by the beatmap
+	// this should be added to the app's ticker
   updateTracks() {
     const t = this.time();
 

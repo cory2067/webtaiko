@@ -13,7 +13,7 @@ class Track {
     this.texture = PIXI.loader.resources[texture].texture;
 
     // y coordinate of this track
-    this.position = position;
+    this.position = position * 152;
 
     // time from when circle enters screen to when it should be hit
     this.approachTime = approachTime;
@@ -24,6 +24,7 @@ class Track {
     target.width = 152;
     target.height = 152;
     target.x = 116;
+    target.y = this.position;
 
     this.container.addChild(target);
     this.container.addChild(this.circles);
@@ -38,7 +39,7 @@ class Track {
     circle.x = window.innerWidth;
     circle.y = this.position + 12;
     circle.hitTime = hitTime;
-    circles.addChild(circle);
+    this.circles.addChild(circle);
   }
 
   // update position of active hitcircles 

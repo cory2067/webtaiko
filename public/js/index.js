@@ -25,22 +25,11 @@ PIXI.loader
   ])
   .load(setup)
 
-let track, circles;
 
-window.addEventListener("keydown", event => { 
-  const row = keymap[event.key]; 
-  if (row == 2) {
-    track.hit(performance.now() - musicStart);
-  }
-}, false);
-
-let mapdata;
-let mapcursor = 0;
-let mapall;
+let mapData;
 $.getJSON("maps/kero.tkm", (map) => {
-  console.log("loaded")
-  mapdata = map.hits;
-  mapall = map;
+  console.log("loaded tkm");
+  mapData = map;
 });
 
 sounds.load([
@@ -49,32 +38,13 @@ sounds.load([
   "sound/hit-rim.wav"
 ]);
 
-let musicStart;
+let gameplay;
 sounds.whenLoaded = () => {
-  let music = sounds["maps/kero.mp3"];
-  musicStart = performance.now();
-  music.play();
-  
-  new Gameplay('maps/kero.mp3', mapall);
+  gameplay = new Gameplay('maps/kero.mp3', mapData);
+  gameplay.start();
+  app.stage.addChild(gameplay.container);
+  app.ticker.add(gameplay.updateTracks.bind(gameplay));
 }
 
 function setup() {
-  track = new Track("img/hitcircle-blue.png",
-                    "sound/hit-rim.wav",
-                    0, 1000);
-
-  circles = track.circles;
-
-  app.stage.addChild(track.container);
-  app.ticker.add(updateTracks);
-}
-
-function updateTracks() {
-  const musicTime = performance.now() - musicStart;  
-  track.updateCircles(musicTime);
-  
-  while (mapdata[mapcursor][0] - 1500 < musicTime) {
-    track.addCircle(mapdata[mapcursor][0]);
-    mapcursor++;
-  }
 }
