@@ -19,9 +19,10 @@ app.renderer.resize(window.innerWidth, window.innerHeight);
 
 PIXI.loader
   .add([
-    "img/hitcircle-red.png",
     "img/target.png",
+    "img/hitcircle-red.png",
     "img/hitcircle-blue.png",
+    "img/hitcircle-yellow.png",
   ])
   .load(setup)
 
@@ -35,7 +36,8 @@ $.getJSON("maps/kero.tkm", (map) => {
 sounds.load([
   "maps/kero.mp3",
   "sound/hit-center.wav",
-  "sound/hit-rim.wav"
+  "sound/hit-rim.wav",
+  "sound/hit-ride.wav"
 ]);
 
 let gameplay;
