@@ -17,13 +17,6 @@ app.renderer.view.style.display = "block";
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
-const keymap = {
- 1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,0:0,
- q:1,w:1,e:1,r:1,t:1,y:1,u:1,i:1,o:1,p:1,
- a:2,s:2,d:2,f:2,g:2,h:2,j:2,k:2,l:2,';':2,
- z:3,x:3,c:3,v:3,b:3,n:3,m:3,',':3,'.':3,'/':3
-}
-
 PIXI.loader
   .add([
     "img/hitcircle-red.png",
@@ -43,15 +36,17 @@ window.addEventListener("keydown", event => {
 
 let mapdata;
 let mapcursor = 0;
+let mapall;
 $.getJSON("maps/kero.tkm", (map) => {
   console.log("loaded")
   mapdata = map.hits;
+  mapall = map;
 });
 
 sounds.load([
   "maps/kero.mp3",
-  "sound/taiko/taiko-normal-hitnormal.wav",
-  "sound/taiko/taiko-normal-hitclap.wav"
+  "sound/hit-center.wav",
+  "sound/hit-rim.wav"
 ]);
 
 let musicStart;
@@ -59,11 +54,13 @@ sounds.whenLoaded = () => {
   let music = sounds["maps/kero.mp3"];
   musicStart = performance.now();
   music.play();
+  
+  new Gameplay('maps/kero.mp3', mapall);
 }
 
 function setup() {
   track = new Track("img/hitcircle-blue.png",
-                    "sound/taiko/taiko-normal-hitclap.wav",
+                    "sound/hit-rim.wav",
                     0, 1000);
 
   circles = track.circles;

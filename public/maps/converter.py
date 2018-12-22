@@ -1,7 +1,16 @@
 import csv
 import json
 
-out = {"title": "kero", "hits": []}
+out = {
+        "title": "kero",
+         "tracks": [
+            {"color": "red", "sound": "center", "row": 2},
+            {"color": "blue", "sound": "rim", "row": 1}
+         ], 
+         "approachTime": 1000,
+         "hits": []
+      }
+
 with open("kero.osu") as f:
     reader = csv.reader(f)
     for row in reader:
