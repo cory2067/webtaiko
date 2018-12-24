@@ -1,3 +1,5 @@
+const HIT_WINDOW = 35; 
+
 class Track {
   constructor(texture, hitsound, position, approachTime=1000) {
     // master container for this track
@@ -32,7 +34,6 @@ class Track {
 
   // spawn a new hitcircle
   addCircle(hitTime) {
-    console.log("adding sprite");
     const circle = new PIXI.Sprite(this.texture);
     circle.width = 128;
     circle.height = 128;
@@ -48,7 +49,7 @@ class Track {
     for (const circle of this.circles.children) {
       circle.x = 128 + (128 - window.innerWidth)/this.approachTime * (time - circle.hitTime);
 
-      if (circle.x < -128) {
+      if (time-circle.hitTime > HIT_WINDOW*4) { // took too long to hit
         toDelete.push(circle);
       }
     }
@@ -58,11 +59,27 @@ class Track {
     for (const circle of toDelete) {
       this.circles.removeChild(circle);
     }
+
+    return toDelete.length; // number of missed notes
   }
 
   // register a hit (keypress) on this track
   hit(time) {
+    this.hitsound.play(); // always play hitsound
+    if (!this.circles.children.length) return; // no circles on track, ignore
+    const error = Math.abs(this.circles.getChildAt(0).hitTime - time);
+
+    let acc; 
+    if (error < HIT_WINDOW)
+      acc = 100;
+    else if (error < HIT_WINDOW*2)
+      acc = 50;
+    else if (error < HIT_WINDOW*4)
+      acc = 25;
+    else
+      return 0;
+
     this.circles.removeChildAt(0); 
-    this.hitsound.play();
+    return acc;
   }
 } 

@@ -39,7 +39,8 @@ sounds.load([
   `maps/${MAP}.mp3`,
   "sound/hit-center.wav",
   "sound/hit-rim.wav",
-  "sound/hit-ride.wav"
+  "sound/hit-ride.wav",
+  "sound/combobreak.wav"
 ]);
 
 let gameplay;

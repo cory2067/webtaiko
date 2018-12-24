@@ -6,6 +6,7 @@ const keymap = {
   z:3,x:3,c:3,v:3,b:3,n:3,m:3,',':3,'.':3,'/':3
 }
 
+// tracks all gameplay objects and score indicators
 class Gameplay {
   constructor(audio, mapData) {
     // actual music for the map
@@ -19,6 +20,24 @@ class Gameplay {
 
     // contains all gameplay elements
     this.container = new PIXI.Container();
+
+    // raw score is not normalized (to be out of 1,000,000)
+    this.rawScore = 0;
+    this.scoreText = new PIXI.Text("Score: 0", new PIXI.TextStyle({fill: "white"}));
+    this.scoreText.y = 500;
+    this.container.addChild(this.scoreText);
+
+    // accuracy percent is accValue/hitObjects
+    this.accValue = 0;
+    this.hitObjects = 0;
+    this.accText = new PIXI.Text("Acc: 100%", new PIXI.TextStyle({fill: "white"}));
+    this.accText.y = 550;
+    this.container.addChild(this.accText);
+
+    this.combo = 0;
+    this.comboText = new PIXI.Text("Combo: 0", new PIXI.TextStyle({fill: "white"}));
+    this.comboText.y = 600;
+    this.container.addChild(this.comboText);
 
     // map for row of keys -> track
     this.rowToTrack = {};
@@ -36,6 +55,12 @@ class Gameplay {
       this.container.addChild(track.container);
     }
 
+    this.maxScore = 0; // stupidly "integrates" over every hit circle
+    for (const circle in this.map.hits) {
+      this.maxScore += this.computeScore(circle+1, 100);
+      console.log(this.computeScore(circle+1, 100));
+    }
+
     window.addEventListener("keydown", this.handleKey.bind(this), false);
   }
 
@@ -50,6 +75,11 @@ class Gameplay {
     return performance.now() - this.startTime;
   }
 
+  // score for a single hitcircle, given acc for that one circle
+  computeScore(combo, acc) {
+    return Math.log(combo + 1) * acc;
+  }
+
   handleKey(event) {
     if (!(event.key in keymap)) return;
 
@@ -57,7 +87,13 @@ class Gameplay {
     const track = this.rowToTrack[row];
 
     if (track) {
-      track.hit(this.time());
+      const acc = track.hit(this.time());
+      if (acc) { // a hit was registered
+        this.accValue += acc;
+        this.hitObjects++; 
+        this.combo++;
+        this.rawScore += this.computeScore(this.combo, acc);
+      }
     }
   }
 
@@ -68,7 +104,13 @@ class Gameplay {
 
     // update existing hitcircles
     for (const track of this.tracks) {
-      track.updateCircles(t); 
+      const missedCircles = track.updateCircles(t); 
+      this.hitObjects += missedCircles; // reduce acc for misses
+      if (missedCircles) {
+        if (this.combo > 4) // avoid spamming combobreak sound
+          sounds["sound/combobreak.wav"].play();
+        this.combo = 0; 
+      }
     }
 
     // spawn new hitcircles
@@ -80,6 +122,12 @@ class Gameplay {
 
       track.addCircle(circle[0]);
       this.cursor++;
+    }
+
+    this.scoreText.text = "Score: " + Math.round(1000000*this.rawScore/this.maxScore);
+    this.comboText.text = "Combo: " + this.combo;
+    if (this.hitObjects) {
+      this.accText.text = "Acc: " + Math.round(100 * this.accValue / this.hitObjects) / 100 + "%";
     }
   }
 }
