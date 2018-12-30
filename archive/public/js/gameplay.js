@@ -58,7 +58,6 @@ class Gameplay {
     this.maxScore = 0; // stupidly "integrates" over every hit circle
     for (const circle in this.map.hits) {
       this.maxScore += this.computeScore(circle+1, 100);
-      console.log(this.computeScore(circle+1, 100));
     }
 
     window.addEventListener("keydown", this.handleKey.bind(this), false);
@@ -114,7 +113,7 @@ class Gameplay {
     }
 
     // spawn new hitcircles
-    while (this.map.hits[this.cursor][0] - this.map.approachTime < t) {
+    while (this.cursor < this.map.hits.length && (this.map.hits[this.cursor][0] - this.map.approachTime) < t) {
       // circle[0]: time (ms) when circle should be hit
       // circle[1]: the track this circle appears on
       const circle = this.map.hits[this.cursor];

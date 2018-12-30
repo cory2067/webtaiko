@@ -1,2 +1,5 @@
-# taiko-mania
-temporary name
+# web taiko
+
+## running
+- install dependencies with `dep ensure`
+
