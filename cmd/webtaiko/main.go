@@ -9,12 +9,12 @@ import (
 
 func main() {
 	fmt.Println("Starting server")
-
-	// Serve static files at /static
-	fs := http.FileServer(http.Dir("static/"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	r := mux.NewRouter()
+
+    // Serve static files at /static
+	fs := http.FileServer(http.Dir("web/static"))
+	r.PathPrefix("/static").Handler(http.StripPrefix("/static/", fs))
+
 	r.HandleFunc("/map/{title}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		title := vars["title"]
@@ -22,7 +22,7 @@ func main() {
 		fmt.Fprintf(w, "You've requested the map: %s\n", title)
 	})
 
-    tmpl := template.Must(template.ParseFiles("index.html"))
+    tmpl := template.Must(template.ParseFiles("web/templates/index.html"))
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         tmpl.Execute(w, nil)
 	})
