@@ -1,2 +1,0 @@
-# taiko-mania
-temporary name
