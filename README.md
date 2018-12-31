@@ -1,5 +1,5 @@
 # web taiko
 
 ## running
-- install dependencies with `dep ensure`
-
+- install server dependencies with `dep ensure`
+- run the build script `./run`

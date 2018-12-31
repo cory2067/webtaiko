@@ -15,16 +15,17 @@ func main() {
 	fs := http.FileServer(http.Dir("web/static"))
 	r.PathPrefix("/static").Handler(http.StripPrefix("/static/", fs))
 
-	r.HandleFunc("/map/{title}", func(w http.ResponseWriter, r *http.Request) {
+    tmpl := template.Must(template.ParseFiles("web/templates/index.html"))
+	r.HandleFunc("/play/{mapId}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		title := vars["title"]
+		mapId := vars["mapId"]
 
-		fmt.Fprintf(w, "You've requested the map: %s\n", title)
+        tmpl.Execute(w, mapId)
 	})
 
-    tmpl := template.Must(template.ParseFiles("web/templates/index.html"))
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        tmpl.Execute(w, nil)
+        fmt.Fprintf(w, "home page");
+        // tmpl.Execute(w, nil)
 	})
 
 	http.ListenAndServe(":8000", r)
