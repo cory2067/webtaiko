@@ -1,9 +1,12 @@
 // map keys to track index
-const keymap = {
+/*const keymap = {
   1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,0:0,
   q:1,w:1,e:1,r:1,t:1,y:1,u:1,i:1,o:1,p:1,
   a:2,s:2,d:2,f:2,g:2,h:2,j:2,k:2,l:2,';':2,
   z:3,x:3,c:3,v:3,b:3,n:3,m:3,',':3,'.':3,'/':3
+}*/
+const keymap = {
+  d:1,f:0,j:0,k:1
 }
 
 // tracks all gameplay objects and score indicators
@@ -39,24 +42,9 @@ class Gameplay {
     this.comboText.y = 600;
     this.container.addChild(this.comboText);
 
-    // map for row of keys -> track
-    this.rowToTrack = {};
-
-    // all tracks currently in play
-    this.tracks = [];
-    for (const i in this.map.tracks) {
-      const trackData = this.map.tracks[i];
-      const track = new Track(`/static/img/hitcircle-${trackData.color}.png`,
-                              `/static/sound/hit-${trackData.sound}.wav`,
-                              trackData.row, this.map.approachTime);
-
-      this.tracks.push(track); 
-      this.rowToTrack[trackData.row] = track;
-      this.container.addChild(track.container);
-    }
-
-    //this.track = new Track(this.map.approachTime);
-    //this.container.addChid(this.track.container);
+    // primary gameplay element
+    this.track = new Track(this.map.approachTime);
+    this.container.addChild(this.track.container);
 
     this.maxScore = 0; // stupidly "integrates" over every hit circle
     for (const circle in this.map.hits) {
@@ -82,56 +70,50 @@ class Gameplay {
     return Math.log(combo + 1) * acc;
   }
 
-  registerMiss() {
+  registerMiss(misses=1) {
     if (this.combo > 4) // avoid spamming combobreak sound
       sounds["/static/sound/combobreak.wav"].play();
     this.combo = 0; 
-    this.rawScore *= 0.98;
+    console.log(misses);
+    this.rawScore *= 0.98**misses;
   }
 
   handleKey(event) {
     if (!(event.key in keymap)) return;
+    const color = keymap[event.key];
+    const acc = this.track.hit(this.time(), color);
 
-    const row = keymap[event.key];
-    const track = this.rowToTrack[row];
+    if (acc < 0) return; // no hit detected
+    this.hitObjects++;
+    this.accValue += acc;
 
-    if (track) {
-      const acc = track.hit(this.time(), 2 - row);
-      if (acc < 0) return; // no hit detected
-      this.hitObjects++;
-      this.accValue += acc;
-
-      if (acc) { // a hit was successful
-        this.combo++;
-        this.rawScore += this.computeScore(this.combo, acc);
-      } else { // wrong color pressed
-        this.registerMiss();
-      }
+    if (acc) { // a hit was successful
+      this.combo++;
+      this.rawScore += this.computeScore(this.combo, acc);
+    } else { // wrong color pressed
+      this.registerMiss();
     }
   }
 
-  // update all tracks being played by the beatmap
-	// this should be added to the app's ticker
-  updateTracks() {
+  // update the track being played by the beatmap
+  // this should be added to the app's ticker
+  updateTrack() {
     const t = this.time();
 
     // update existing hitcircles
-    for (const track of this.tracks) {
-      const missedCircles = track.updateCircles(t); 
-      this.hitObjects += missedCircles; // reduce acc for misses
-      if (missedCircles) {
-        this.registerMiss();
-      }
+    const missedCircles = this.track.updateCircles(t); 
+    this.hitObjects += missedCircles; // reduce acc for misses
+    if (missedCircles) {
+      this.registerMiss(missedCircles);
     }
 
     // spawn new hitcircles
     while (this.cursor < this.map.hits.length && (this.map.hits[this.cursor][0] - this.map.approachTime) < t) {
       // circle[0]: time (ms) when circle should be hit
-      // circle[1]: the track this circle appears on
+      // circle[1] % 2: the color this circle is
+      // circle[1] & 2: whether the circle is large
       const circle = this.map.hits[this.cursor];
-      const track = this.tracks[circle[1] % 2];
-
-      track.addCircle(circle[0], circle[1] % 2, circle[1] & 2);
+      this.track.addCircle(circle[0], circle[1] % 2, circle[1] & 2);
       this.cursor++;
     }
 

@@ -1,10 +1,8 @@
 const HIT_WINDOW = 35; 
 const TRACK_POSITION = 152;
-const RED = 0;
-const BLUE = 1;
 
 class Track {
-  constructor(texture, hitsound, position, approachTime=1000) {
+  constructor(approachTime=1000) {
     // master container for this track
     this.container = new PIXI.Container();
 
@@ -87,15 +85,19 @@ class Track {
     const circle = this.circles.getChildAt(0);
     const error = Math.abs(circle.hitTime - time);
 
-    if (error >= HIT_WINDOW*4) return -1; // circles too far away
-    if (color != circle.color) return 0;  // wrong color is a miss 
-
-    if (this.largeHit.active) {
+    if (this.largeHit.active) { // first, see if the second hit for a large circle
       this.largeHit.active = false;
-      if (time - this.largeHit.time < 5) { // 5 ms window to hit double notes  
+      // 5 ms window to hit double notes
+      if (color == this.largeHit.color && time - this.largeHit.time < 5) {
         // successful large hit
         return this.largeHit.acc;
       }
+    }
+    
+    if (error >= HIT_WINDOW*4) return -1; // circles too far away
+    if (color != circle.color) {
+      this.circles.removeChildAt(0); 
+      return 0;  // wrong color is a miss 
     }
 
     let acc; 
@@ -110,7 +112,8 @@ class Track {
       this.largeHit = {
           active: true,
           time: time,
-          acc: acc
+          acc: acc,
+          color: color
       }
     }
 

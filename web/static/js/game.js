@@ -46,7 +46,7 @@ sounds.whenLoaded = () => {
   gameplay = new Gameplay(`/static/maps/${MAP_ID}.mp3`, mapData);
   gameplay.start();
   app.stage.addChild(gameplay.container);
-  app.ticker.add(gameplay.updateTracks.bind(gameplay));
+  app.ticker.add(gameplay.updateTrack.bind(gameplay));
 }
 
 function setup() {
