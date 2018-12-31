@@ -19,6 +19,9 @@ class Track {
 
     // time from when circle enters screen to when it should be hit
     this.approachTime = approachTime;
+
+    // state needed to detect large hitcircle hits (two keys)
+    this.largeHit = { active: false };
   
     let target = new PIXI.Sprite(
       PIXI.loader.resources["/static/img/target.png"].texture
@@ -33,12 +36,13 @@ class Track {
   }
 
   // spawn a new hitcircle
-  addCircle(hitTime) {
+  addCircle(hitTime, large) {
     const circle = new PIXI.Sprite(this.texture);
-    circle.width = 128;
-    circle.height = 128;
+    circle.large = large;
+    circle.width = 128 + large * 36;
+    circle.height = 128 + large * 36;
     circle.x = window.innerWidth;
-    circle.y = this.position + 12;
+    circle.y = this.position + 12 - 18*large;
     circle.hitTime = hitTime;
     this.circles.addChild(circle);
   }
@@ -67,7 +71,16 @@ class Track {
   hit(time) {
     this.hitsound.play(); // always play hitsound
     if (!this.circles.children.length) return; // no circles on track, ignore
-    const error = Math.abs(this.circles.getChildAt(0).hitTime - time);
+    const circle = this.circles.getChildAt(0);
+    const error = Math.abs(circle.hitTime - time);
+    
+    if (this.largeHit.active) {
+      this.largeHit.active = false;
+      if (time - this.largeHit.time < 5) { // 5 ms window to hit double notes  
+        // successful large hit
+        return this.largeHit.acc;
+      }
+    }
 
     let acc; 
     if (error < HIT_WINDOW)
@@ -78,6 +91,14 @@ class Track {
       acc = 25;
     else
       return 0;
+
+    if (circle.large) {
+      this.largeHit = {
+          active: true,
+          time: time,
+          acc: acc
+      }
+    }
 
     this.circles.removeChildAt(0); 
     return acc;

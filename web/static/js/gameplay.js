@@ -117,9 +117,9 @@ class Gameplay {
       // circle[0]: time (ms) when circle should be hit
       // circle[1]: the track this circle appears on
       const circle = this.map.hits[this.cursor];
-      const track = this.tracks[circle[1]];
+      const track = this.tracks[circle[1] % 2];
 
-      track.addCircle(circle[0]);
+      track.addCircle(circle[0], circle[1] & 2);
       this.cursor++;
     }
 
