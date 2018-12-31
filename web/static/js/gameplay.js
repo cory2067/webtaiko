@@ -55,6 +55,9 @@ class Gameplay {
       this.container.addChild(track.container);
     }
 
+    //this.track = new Track(this.map.approachTime);
+    //this.container.addChid(this.track.container);
+
     this.maxScore = 0; // stupidly "integrates" over every hit circle
     for (const circle in this.map.hits) {
       this.maxScore += this.computeScore(circle+1, 100);
@@ -79,6 +82,13 @@ class Gameplay {
     return Math.log(combo + 1) * acc;
   }
 
+  registerMiss() {
+    if (this.combo > 4) // avoid spamming combobreak sound
+      sounds["/static/sound/combobreak.wav"].play();
+    this.combo = 0; 
+    this.rawScore *= 0.98;
+  }
+
   handleKey(event) {
     if (!(event.key in keymap)) return;
 
@@ -86,12 +96,16 @@ class Gameplay {
     const track = this.rowToTrack[row];
 
     if (track) {
-      const acc = track.hit(this.time());
-      if (acc) { // a hit was registered
-        this.accValue += acc;
-        this.hitObjects++; 
+      const acc = track.hit(this.time(), 2 - row);
+      if (acc < 0) return; // no hit detected
+      this.hitObjects++;
+      this.accValue += acc;
+
+      if (acc) { // a hit was successful
         this.combo++;
         this.rawScore += this.computeScore(this.combo, acc);
+      } else { // wrong color pressed
+        this.registerMiss();
       }
     }
   }
@@ -106,9 +120,7 @@ class Gameplay {
       const missedCircles = track.updateCircles(t); 
       this.hitObjects += missedCircles; // reduce acc for misses
       if (missedCircles) {
-        if (this.combo > 4) // avoid spamming combobreak sound
-          sounds["/static/sound/combobreak.wav"].play();
-        this.combo = 0; 
+        this.registerMiss();
       }
     }
 
@@ -119,7 +131,7 @@ class Gameplay {
       const circle = this.map.hits[this.cursor];
       const track = this.tracks[circle[1] % 2];
 
-      track.addCircle(circle[0], circle[1] & 2);
+      track.addCircle(circle[0], circle[1] % 2, circle[1] & 2);
       this.cursor++;
     }
 

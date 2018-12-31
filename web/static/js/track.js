@@ -1,4 +1,7 @@
 const HIT_WINDOW = 35; 
+const TRACK_POSITION = 152;
+const RED = 0;
+const BLUE = 1;
 
 class Track {
   constructor(texture, hitsound, position, approachTime=1000) {
@@ -6,16 +9,24 @@ class Track {
     this.container = new PIXI.Container();
 
     // all active hitcircles in this track
-    this.circles = new PIXI.particles.ParticleContainer();
+    // TODO refactor with particlecontainer (will need to use sprite sheet)
+    this.circles = new PIXI.Container();
 
     // sound to play when note hit
-    this.hitsound = sounds[hitsound];
+    this.hitsounds = [
+        sounds['/static/sound/hit-center.wav'],
+        sounds['/static/sound/hit-rim.wav']
+    ]
 
-    // texture to use for hitcircles on this track
-    this.texture = PIXI.loader.resources[texture].texture;
+    // textures to use for hitcircles on this track
+    this.textures = [
+        PIXI.loader.resources['/static/img/hitcircle-red.png'].texture,
+        PIXI.loader.resources['/static/img/hitcircle-blue.png'].texture
+    ];
 
     // y coordinate of this track
-    this.position = position * 152;
+    // may be changable in future
+    this.position = TRACK_POSITION;
 
     // time from when circle enters screen to when it should be hit
     this.approachTime = approachTime;
@@ -36,8 +47,9 @@ class Track {
   }
 
   // spawn a new hitcircle
-  addCircle(hitTime, large) {
-    const circle = new PIXI.Sprite(this.texture);
+  addCircle(hitTime, color, large) {
+    const circle = new PIXI.Sprite(this.textures[color]);
+    circle.color = color;
     circle.large = large;
     circle.width = 128 + large * 36;
     circle.height = 128 + large * 36;
@@ -68,12 +80,16 @@ class Track {
   }
 
   // register a hit (keypress) on this track
-  hit(time) {
-    this.hitsound.play(); // always play hitsound
-    if (!this.circles.children.length) return; // no circles on track, ignore
+  // returns accuracy of this hit, or -1 if no hit was registered
+  hit(time, color) {
+    this.hitsounds[color].play(); // always play hitsound
+    if (!this.circles.children.length) return -1; // no circles on track, ignore
     const circle = this.circles.getChildAt(0);
     const error = Math.abs(circle.hitTime - time);
-    
+
+    if (error >= HIT_WINDOW*4) return -1; // circles too far away
+    if (color != circle.color) return 0;  // wrong color is a miss 
+
     if (this.largeHit.active) {
       this.largeHit.active = false;
       if (time - this.largeHit.time < 5) { // 5 ms window to hit double notes  
@@ -87,10 +103,8 @@ class Track {
       acc = 100;
     else if (error < HIT_WINDOW*2)
       acc = 50;
-    else if (error < HIT_WINDOW*4)
-      acc = 25;
     else
-      return 0;
+      acc = 25;
 
     if (circle.large) {
       this.largeHit = {
