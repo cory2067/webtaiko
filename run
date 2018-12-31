@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+cd web
+echo "Compiling typescript"
+browserify src/main.ts --debug -p tsify -o static/js/bundle.js
+cd ..
+
+echo "Compiling server"
+go run cmd/webtaiko/main.go

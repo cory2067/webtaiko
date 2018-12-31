@@ -1,0 +1,19 @@
+{
+  "name": "webtaiko",
+  "version": "1.0.0",
+  "description": "Frontend for webtaiko",
+  "main": "index.js",
+  "dependencies": {
+    "@types/jquery": "^3.3.29",
+    "@types/pixi.js": "^4.8.6",
+    "browserify": "^16.2.3",
+    "tsify": "^4.0.1",
+    "typescript": "^3.2.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cory Lynch",
+  "license": "ISC"
+}
