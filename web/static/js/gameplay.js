@@ -74,8 +74,8 @@ class Gameplay {
     if (this.combo > 4) // avoid spamming combobreak sound
       sounds["/static/sound/combobreak.wav"].play();
     this.combo = 0; 
-    console.log(misses);
     this.rawScore *= 0.98**misses;
+    this.track.updateIndicator(this.time(), 0);
   }
 
   handleKey(event) {
@@ -90,6 +90,7 @@ class Gameplay {
     if (acc) { // a hit was successful
       this.combo++;
       this.rawScore += this.computeScore(this.combo, acc);
+      this.track.updateIndicator(this.time(), acc);
     } else { // wrong color pressed
       this.registerMiss();
     }

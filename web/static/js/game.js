@@ -22,14 +22,17 @@ PIXI.loader
     "/static/img/target.png",
     "/static/img/hitcircle-red.png",
     "/static/img/hitcircle-blue.png",
-    "/static/img/hitcircle-yellow.png",
+    "/static/img/hit-perfect.png",
+    "/static/img/hit-good.png",
+    "/static/img/hit-bad.png",
+    "/static/img/miss.png",
   ])
   .load(setup)
 
 
 let mapData;
-$.getJSON(`/static/maps/${MAP_ID}.tkm`, (map) => {
-  console.log("loaded tkm");
+$.getJSON(`/static/maps/${MAP_ID}.tk`, (map) => {
+  console.log("loaded tk");
   mapData = map;
 });
 
@@ -37,7 +40,6 @@ sounds.load([
   `/static/maps/${MAP_ID}.mp3`,
   "/static/sound/hit-center.wav",
   "/static/sound/hit-rim.wav",
-  "/static/sound/hit-ride.wav",
   "/static/sound/combobreak.wav"
 ]);
 

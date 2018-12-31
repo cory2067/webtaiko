@@ -22,6 +22,13 @@ class Track {
         PIXI.loader.resources['/static/img/hitcircle-blue.png'].texture
     ];
 
+    this.indicatorTex = {
+        0:   PIXI.loader.resources['/static/img/miss.png'].texture,
+        25:  PIXI.loader.resources['/static/img/hit-bad.png'].texture,
+        50:  PIXI.loader.resources['/static/img/hit-good.png'].texture,
+        100: PIXI.loader.resources['/static/img/hit-perfect.png'].texture
+    };
+
     // y coordinate of this track
     // may be changable in future
     this.position = TRACK_POSITION;
@@ -31,6 +38,9 @@ class Track {
 
     // state needed to detect large hitcircle hits (two keys)
     this.largeHit = { active: false };
+
+    // indicates perfect, good, bad, miss
+    this.indicator = {};
   
     let target = new PIXI.Sprite(
       PIXI.loader.resources["/static/img/target.png"].texture
@@ -57,6 +67,33 @@ class Track {
     this.circles.addChild(circle);
   }
 
+  updateIndicator(time, hit=-1) {
+    // a hit/miss was registered!
+    if (hit > -1) {
+      if (this.indicator.sprite) { // remove the last indicator
+        this.container.removeChild(this.indicator.sprite);
+      }
+
+      const ind = new PIXI.Sprite(this.indicatorTex[hit]);
+
+      ind.width = 256;
+      ind.height = 256;
+      ind.x = 64;
+      ind.y = this.position - 54;
+
+      this.indicator.sprite = ind;
+      this.container.addChild(ind);
+    } else if (this.indicator.sprite) {
+      // no hit registered, just continue the animation of the current one
+      const ind = this.indicator.sprite;
+      ind.alpha -= 0.05;
+      if (ind.alpha < 0) {
+        ind.alpha = 0;
+      }
+
+    }
+  }
+
   // update position of active hitcircles 
   updateCircles(time) {
     let toDelete = [];
@@ -74,6 +111,7 @@ class Track {
       this.circles.removeChild(circle);
     }
 
+    this.updateIndicator(time, -1); // step the indicator's animtion
     return toDelete.length; // number of missed notes
   }
 
