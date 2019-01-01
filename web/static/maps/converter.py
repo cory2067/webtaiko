@@ -1,7 +1,7 @@
 import csv
 import json
 
-NAME = "jbf"
+NAME = "augo"
 
 out = {
         "title": NAME,

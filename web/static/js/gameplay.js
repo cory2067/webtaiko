@@ -81,18 +81,27 @@ class Gameplay {
   handleKey(event) {
     if (!(event.key in keymap)) return;
     const color = keymap[event.key];
-    const acc = this.track.hit(this.time(), color);
+    const hit = this.track.hit(this.time(), color);
 
-    if (acc < 0) return; // no hit detected
-    this.hitObjects++;
-    this.accValue += acc;
-
-    if (acc) { // a hit was successful
-      this.combo++;
-      this.rawScore += this.computeScore(this.combo, acc);
-      this.track.updateIndicator(this.time(), acc);
-    } else { // wrong color pressed
-      this.registerMiss();
+    switch (hit.type) {
+      case "none":
+        // no hit detected
+        break;
+      case "miss":
+        this.registerMiss();
+        break;
+      case "normal":
+        this.hitObjects++;
+        this.accValue += hit.acc;
+        this.combo++;
+        this.rawScore += this.computeScore(this.combo, hit.acc);
+        this.track.updateIndicator(this.time(), hit.acc);
+        break;
+      case "large": // second hit for a large circle 
+        this.rawScore += this.computeScore(this.combo, hit.acc);
+        break;
+      default:
+        alert("unexpected error: unknown hit type");
     }
   }
 

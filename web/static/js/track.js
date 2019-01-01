@@ -1,4 +1,4 @@
-const HIT_WINDOW = 35; 
+const HIT_WINDOW = 30; 
 const TRACK_POSITION = 152;
 
 class Track {
@@ -100,7 +100,7 @@ class Track {
     for (const circle of this.circles.children) {
       circle.x = 128 + (128 - window.innerWidth)/this.approachTime * (time - circle.hitTime);
 
-      if (time-circle.hitTime > HIT_WINDOW*4) { // took too long to hit
+      if (time-circle.hitTime > HIT_WINDOW*3) { // took too long to hit
         toDelete.push(circle);
       }
     }
@@ -119,7 +119,7 @@ class Track {
   // returns accuracy of this hit, or -1 if no hit was registered
   hit(time, color) {
     this.hitsounds[color].play(); // always play hitsound
-    if (!this.circles.children.length) return -1; // no circles on track, ignore
+    if (!this.circles.children.length) return { type: "none" }; // no circles on track, ignore
     const circle = this.circles.getChildAt(0);
     const error = Math.abs(circle.hitTime - time);
 
@@ -128,14 +128,14 @@ class Track {
       // 5 ms window to hit double notes
       if (color == this.largeHit.color && time - this.largeHit.time < 5) {
         // successful large hit
-        return this.largeHit.acc;
+        return { type: "large", acc: this.largeHit.acc };
       }
     }
     
-    if (error >= HIT_WINDOW*4) return -1; // circles too far away
+    if (error >= HIT_WINDOW*3) return { type: "none" }; // circles too far away
     if (color != circle.color) {
       this.circles.removeChildAt(0); 
-      return 0;  // wrong color is a miss 
+      return { type: "miss" };  // wrong color is a miss 
     }
 
     let acc; 
@@ -156,6 +156,6 @@ class Track {
     }
 
     this.circles.removeChildAt(0); 
-    return acc;
+    return { type: "normal", acc: acc };
   }
 } 
