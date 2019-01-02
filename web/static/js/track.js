@@ -22,7 +22,8 @@ class Track {
         PIXI.loader.resources['/static/img/hitcircle-blue.png'].texture,
         PIXI.loader.resources['/static/img/sliderhead.png'].texture,
         PIXI.loader.resources['/static/img/sliderbody.png'].texture,
-        PIXI.loader.resources['/static/img/sliderend.png'].texture
+        PIXI.loader.resources['/static/img/sliderend.png'].texture,
+        PIXI.loader.resources['/static/img/spinner-warning.png'].texture
     ];
 
     this.indicatorTex = {
@@ -41,6 +42,9 @@ class Track {
 
     // state needed to detect large hitcircle hits (two keys)
     this.largeHit = { active: false };
+    
+    // state of current spinner
+    this.spinner = { active: false };
 
     // indicates perfect, good, bad, miss
     this.indicator = {};
@@ -89,8 +93,16 @@ class Track {
     this.circles.addChild(slider); 
   }
 
-  addSpinner(hitTime) {
-    console.log("Render a spinner");
+  addSpinner(hitTime, duration) {
+    const spinner = new PIXI.Sprite(this.textures[5]);
+    spinner.type = "spinner";
+    spinner.width = 128;
+    spinner.height = 128;
+    spinner.x = window.innerWidth;
+    spinner.y = this.position + 12;
+    spinner.hitTime = hitTime;
+    spinner.duration = duration;
+    this.circles.addChild(spinner);
   }
 
   // spawn a new normal hitcircle
@@ -149,10 +161,25 @@ class Track {
           }
           break;
         case "slider":
+          // delete slider when it's finished
           if (time > circle.hitTime + circle.duration) {
             toDelete.push(circle);
           }
+          break;
+        case "spinner":
+          // auto activate spinner
+          if (time > circle.hitTime) {
+            this.spinner.active = true;
+            this.spinner.hits = Math.round(circle.duration / 80);
+            this.spinner.endTime = circle.hitTime + circle.duration;
+            this.spinner.color = -1; // start with any color
+            toDelete.push(circle);
+          }
       }
+    }
+
+    if (this.spinner.active && time > this.spinner.endTime) {
+      this.spinner.active = false;
     }
 
     // despawn old hitcircles
@@ -169,6 +196,18 @@ class Track {
   // returns accuracy of this hit, or -1 if no hit was registered
   hit(time, color) {
     this.hitsounds[color].play(); // always play hitsound
+   
+    // may be active spinner even if no hitcircles on track 
+    if (this.spinner.active && (this.spinner.color === -1 || this.spinner.color === color)) {
+      this.spinner.hits--;
+      this.spinner.color = 1 - color;
+      console.log(this.spinner.hits);
+      if (!this.spinner.hits) {
+        this.spinner.active = false;
+      }
+      return { type: "spinner", hits: this.spinner };
+    }
+    
     if (!this.circles.children.length) return { type: "none" }; // no circles on track, ignore
     const circle = this.circles.getChildAt(0);
     const error = Math.abs(circle.hitTime - time);
@@ -183,6 +222,9 @@ class Track {
     }
 
     if (circle.type === "slider") return { type: "slider" };
+
+    // spinner is triggered automatically, so hitting the spinner warning does nothing
+    if (circle.type === "spinner") return { type: "none" };
     
     if (error >= HIT_WINDOW*3) return { type: "none" }; // circles too far away
     if (color != circle.color) {

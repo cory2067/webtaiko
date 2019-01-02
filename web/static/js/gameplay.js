@@ -117,6 +117,9 @@ class Gameplay {
       case "slider":
         this.rawScore += 100;
         break;
+      case "spinner":
+        this.rawScore += 200;
+        break;
       default:
         alert("unexpected error: unknown hit type");
     }

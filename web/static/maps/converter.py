@@ -54,7 +54,7 @@ if True:
             duration = pixel_length / (100 * slider_mult) * get_timing(time)
         elif osu_type & 8:
             tk_type += 8 # spinner
-            duration = 1000
+            duration = int(row[5]) - time
 
         if duration == -1:
             out['hits'].append([time, tk_type])
