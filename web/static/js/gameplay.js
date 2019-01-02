@@ -47,8 +47,12 @@ class Gameplay {
     this.container.addChild(this.track.container);
 
     this.maxScore = 0; // stupidly "integrates" over every hit circle
-    for (const circle in this.map.hits) {
-      this.maxScore += this.computeScore(circle+1, 100);
+    let combo = 0;
+    for (const circle of this.map.hits) {
+      if (circle[1] <= 4) {
+        this.maxScore += this.getHitScore(combo, 100);
+        combo++;
+      }
     }
 
     window.addEventListener("keydown", this.handleKey.bind(this), false);
@@ -65,9 +69,19 @@ class Gameplay {
     return performance.now() - this.startTime;
   }
 
+  // overall accuracy on map
+  getOverallAccuracy() {
+      return this.accValue / this.hitObjects;
+  }
+
   // score for a single hitcircle, given acc for that one circle
-  computeScore(combo, acc) {
+  getHitScore(combo, acc) {
     return Math.log(combo + 1) * acc;
+  }
+
+  getTotalScore() {
+    if (!this.rawScore) return 0;
+    return Math.round(10000 * this.getOverallAccuracy() * this.rawScore/this.maxScore);
   }
 
   registerMiss(misses=1) {
@@ -94,11 +108,14 @@ class Gameplay {
         this.hitObjects++;
         this.accValue += hit.acc;
         this.combo++;
-        this.rawScore += this.computeScore(this.combo, hit.acc);
+        this.rawScore += this.getHitScore(this.combo, hit.acc);
         this.track.updateIndicator(this.time(), hit.acc);
         break;
       case "large": // second hit for a large circle 
-        this.rawScore += this.computeScore(this.combo, hit.acc);
+        this.rawScore += this.getHitScore(this.combo, hit.acc);
+        break;
+      case "slider":
+        this.rawScore += 100;
         break;
       default:
         alert("unexpected error: unknown hit type");
@@ -136,10 +153,10 @@ class Gameplay {
       this.cursor++;
     }
 
-    this.scoreText.text = "Score: " + Math.round(1000000*this.rawScore/this.maxScore);
+    this.scoreText.text = "Score: " + this.getTotalScore();
     this.comboText.text = "Combo: " + this.combo;
     if (this.hitObjects) {
-      this.accText.text = "Acc: " + Math.round(100 * this.accValue / this.hitObjects) / 100 + "%";
+      this.accText.text = "Acc: " + Math.round(100 * this.getOverallAccuracy()) / 100 + "%";
     }
   }
 }

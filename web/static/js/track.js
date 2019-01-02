@@ -182,7 +182,7 @@ class Track {
       }
     }
 
-    if (circle.type === "slider") return { type: "none" }; //TODO
+    if (circle.type === "slider") return { type: "slider" };
     
     if (error >= HIT_WINDOW*3) return { type: "none" }; // circles too far away
     if (color != circle.color) {
