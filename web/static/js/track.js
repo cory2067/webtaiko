@@ -19,7 +19,10 @@ class Track {
     // textures to use for hitcircles on this track
     this.textures = [
         PIXI.loader.resources['/static/img/hitcircle-red.png'].texture,
-        PIXI.loader.resources['/static/img/hitcircle-blue.png'].texture
+        PIXI.loader.resources['/static/img/hitcircle-blue.png'].texture,
+        PIXI.loader.resources['/static/img/sliderhead.png'].texture,
+        PIXI.loader.resources['/static/img/sliderbody.png'].texture,
+        PIXI.loader.resources['/static/img/sliderend.png'].texture
     ];
 
     this.indicatorTex = {
@@ -54,11 +57,47 @@ class Track {
     this.container.addChild(this.circles);
   }
 
-  // spawn a new hitcircle
-  addCircle(hitTime, color, large) {
+  addSlider(hitTime, duration) {
+    const slider = new PIXI.Container();
+    slider.type = "slider";
+    slider.hitTime = hitTime;
+    slider.duration = duration;
+    slider.x = window.innerWidth;
+    slider.y = this.position + 12;
+
+    const head = new PIXI.Sprite(this.textures[2]);
+    head.width = 128;
+    head.height = 128;
+    slider.addChild(head);
+
+    // pixels per ms
+    const rate = (window.innerWidth - 128)/this.approachTime;
+
+    const body = new PIXI.Sprite(this.textures[3]);
+    console.log(duration, rate, duration*rate);
+    body.width = duration*rate - 256;
+    body.height = 128;
+    body.x = 128;
+    slider.addChild(body);
+
+    const end = new PIXI.Sprite(this.textures[4]);
+    end.width = 128;
+    end.height = 128;
+    end.x = 128 + body.width;
+    slider.addChild(end);
+
+    this.circles.addChild(slider); 
+  }
+
+  addSpinner(hitTime) {
+    console.log("Render a spinner");
+  }
+
+  // spawn a new normal hitcircle
+  addNormalCircle(hitTime, color, large) {
     const circle = new PIXI.Sprite(this.textures[color]);
     circle.color = color;
-    circle.large = large;
+    circle.type = large ? "large" : "normal";
     circle.width = 128 + large * 36;
     circle.height = 128 + large * 36;
     circle.x = window.innerWidth;
@@ -97,11 +136,22 @@ class Track {
   // update position of active hitcircles 
   updateCircles(time) {
     let toDelete = [];
+    let misses = 0;
     for (const circle of this.circles.children) {
       circle.x = 128 + (128 - window.innerWidth)/this.approachTime * (time - circle.hitTime);
 
-      if (time-circle.hitTime > HIT_WINDOW*3) { // took too long to hit
-        toDelete.push(circle);
+      switch (circle.type) {
+        case "normal":
+        case "large":
+          if (time-circle.hitTime > HIT_WINDOW*3) { // took too long to hit
+            toDelete.push(circle);
+            misses++;
+          }
+          break;
+        case "slider":
+          if (time > circle.hitTime + circle.duration) {
+            toDelete.push(circle);
+          }
       }
     }
 
@@ -112,7 +162,7 @@ class Track {
     }
 
     this.updateIndicator(time, -1); // step the indicator's animtion
-    return toDelete.length; // number of missed notes
+    return misses;
   }
 
   // register a hit (keypress) on this track
@@ -131,6 +181,8 @@ class Track {
         return { type: "large", acc: this.largeHit.acc };
       }
     }
+
+    if (circle.type === "slider") return { type: "none" }; //TODO
     
     if (error >= HIT_WINDOW*3) return { type: "none" }; // circles too far away
     if (color != circle.color) {
@@ -146,7 +198,7 @@ class Track {
     else
       acc = 25;
 
-    if (circle.large) {
+    if (circle.type === "large") {
       this.largeHit = {
           active: true,
           time: time,

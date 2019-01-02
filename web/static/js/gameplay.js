@@ -120,10 +120,19 @@ class Gameplay {
     // spawn new hitcircles
     while (this.cursor < this.map.hits.length && (this.map.hits[this.cursor][0] - this.map.approachTime) < t) {
       // circle[0]: time (ms) when circle should be hit
-      // circle[1] % 2: the color this circle is
+      // circle[1] & 1: the color this circle is
       // circle[1] & 2: whether the circle is large
+      // circle[1] & 4: slider
+      // circle[1] & 8: spinner
+      // circle[2]: slider/spinner duration
       const circle = this.map.hits[this.cursor];
-      this.track.addCircle(circle[0], circle[1] % 2, circle[1] & 2);
+      if (circle[1] & 4) {
+        this.track.addSlider(circle[0], circle[2]);
+      } else if (circle[1] & 8) {
+        this.track.addSpinner(circle[0], circle[2]);
+      } else {
+        this.track.addNormalCircle(circle[0], circle[1] % 2, circle[1] & 2);
+      }
       this.cursor++;
     }
 
