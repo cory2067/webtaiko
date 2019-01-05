@@ -23,7 +23,8 @@ class Track {
         PIXI.loader.resources['/static/img/sliderhead.png'].texture,
         PIXI.loader.resources['/static/img/sliderbody.png'].texture,
         PIXI.loader.resources['/static/img/sliderend.png'].texture,
-        PIXI.loader.resources['/static/img/spinner-warning.png'].texture
+        PIXI.loader.resources['/static/img/spinner-warning.png'].texture,
+        PIXI.loader.resources['/static/img/spinner-circle.png'].texture
     ];
 
     this.indicatorTex = {
@@ -93,6 +94,7 @@ class Track {
     this.circles.addChild(slider); 
   }
 
+  // add spinner warning sprite
   addSpinner(hitTime, duration) {
     const spinner = new PIXI.Sprite(this.textures[5]);
     spinner.type = "spinner";
@@ -103,6 +105,30 @@ class Track {
     spinner.hitTime = hitTime;
     spinner.duration = duration;
     this.circles.addChild(spinner);
+  }
+
+  addSpinnerHUD() {
+    const disp = new PIXI.Container();
+    const sprite = new PIXI.Sprite(this.textures[6]);
+    const text = new PIXI.Text(this.spinner.hits, new PIXI.TextStyle({fill: "white", align: "center"}));
+
+    sprite.width = 256;
+    sprite.height = 256;
+    sprite.anchor.x = 0.5;
+    sprite.anchor.y = 0.5;
+    disp.y = this.position + 64;
+    disp.x = 425;
+
+    text.y = 140;
+    text.anchor.x = 0.5;
+    
+    disp.addChild(sprite);
+    disp.addChild(text);
+   
+    this.spinner.display = disp;  
+    this.spinner.sprite = sprite;
+    this.spinner.text = text;
+    this.container.addChild(disp)
   }
 
   // spawn a new normal hitcircle
@@ -173,6 +199,7 @@ class Track {
             this.spinner.hits = Math.round(circle.duration / 80);
             this.spinner.endTime = circle.hitTime + circle.duration;
             this.spinner.color = -1; // start with any color
+            this.addSpinnerHUD(); // todo clean up this 
             toDelete.push(circle);
           }
       }
@@ -180,6 +207,7 @@ class Track {
 
     if (this.spinner.active && time > this.spinner.endTime) {
       this.spinner.active = false;
+      this.container.removeChild(this.spinner.display);
     }
 
     // despawn old hitcircles
@@ -200,10 +228,13 @@ class Track {
     // may be active spinner even if no hitcircles on track 
     if (this.spinner.active && (this.spinner.color === -1 || this.spinner.color === color)) {
       this.spinner.hits--;
+      this.spinner.sprite.rotation++;
+      this.spinner.text.text--;
       this.spinner.color = 1 - color;
       console.log(this.spinner.hits);
       if (!this.spinner.hits) {
         this.spinner.active = false;
+        this.container.removeChild(this.spinner.display);
       }
       return { type: "spinner", hits: this.spinner };
     }

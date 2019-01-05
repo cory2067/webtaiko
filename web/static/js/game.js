@@ -26,6 +26,7 @@ PIXI.loader
     "/static/img/sliderbody.png",
     "/static/img/sliderend.png",
     "/static/img/spinner-warning.png",
+    "/static/img/spinner-circle.png",
     "/static/img/hit-perfect.png",
     "/static/img/hit-good.png",
     "/static/img/hit-bad.png",
