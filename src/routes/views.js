@@ -5,7 +5,7 @@ router.get('/', function (req, res) {
   res.sendFile('index.html', { root: 'src/views' });
 });
 
-router.get('/play/:mapid', function (req, res) {
+router.get('/play/:mapid/:diff', function (req, res) {
   res.sendFile('index.html', { root: 'src/views' });
 });
 

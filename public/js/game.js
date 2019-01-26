@@ -1,4 +1,10 @@
-const MAP_ID = window.location.pathname.split('/')[2];
+const params = window.location.pathname.split('/');
+if (params.length < 4) {
+  alert("ERROR bad path");
+}
+
+const MAP_ID = params[2];
+const DIFF = params[3];
 
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
@@ -38,7 +44,7 @@ PIXI.loader
 
 
 let mapData;
-$.getJSON(`/static/maps/${MAP_ID}.tk`, (map) => {
+$.getJSON(`/static/maps/${MAP_ID}-${DIFF}.tk`, (map) => {
   console.log("loaded tk");
   mapData = map;
 });
