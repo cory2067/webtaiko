@@ -1,0 +1,25 @@
+{
+  "name": "webtaiko",
+  "version": "1.0.0",
+  "description": "Taiko no Tatsujin for web",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cory2067/webtaiko.git"
+  },
+  "author": "Cory Lynch",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cory2067/webtaiko/issues"
+  },
+  "homepage": "https://github.com/cory2067/webtaiko#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6"
+  }
+}

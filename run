@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -e
-
-echo "Compiling server"
-go run cmd/webtaiko/main.go

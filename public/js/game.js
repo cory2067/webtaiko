@@ -1,3 +1,5 @@
+const MAP_ID = window.location.pathname.split('/')[2];
+
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
   type = "canvas"
