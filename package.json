@@ -20,6 +20,8 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
-    "express-session": "^1.15.6"
+    "express-session": "^1.15.6",
+    "request": "^2.88.0",
+    "unzipper": "^0.9.10"
   }
 }
