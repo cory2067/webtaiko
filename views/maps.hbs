@@ -1,0 +1,15 @@
+{{#each maps}}
+  <div>
+    <a href="javascript:download({{this.id}})">
+      {{this.artist}} -- {{this.title}}
+    </a>
+    <p> Mapped by {{this.creator}} </p>
+
+    {{#each this.beatmaps}}
+      <p>{{this.name}}: {{this.star}}*</p>
+    {{/each}}
+    <hr>
+  </div>
+{{/each}}
+
+<script src="/static/js/maps.js"></script>

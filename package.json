@@ -2,9 +2,9 @@
   "name": "webtaiko",
   "version": "1.0.0",
   "description": "Taiko no Tatsujin for web",
-  "main": "src/app.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +21,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "hbs": "^4.0.1",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "unzipper": "^0.9.10"

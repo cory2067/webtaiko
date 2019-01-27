@@ -8,6 +8,7 @@ const api = require('./routes/api');
 
 // initialize express app
 const app = express();
+app.set('view engine', 'hbs');
 
 // set POST request body parser
 app.use(bodyParser.urlencoded({ extended: false }));
