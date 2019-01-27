@@ -2,6 +2,7 @@ const http = require('http');
 const bodyParser = require('body-parser');
 const express = require('express');
 const session = require('express-session');
+require('dotenv').config();
 
 const views = require('./routes/views');
 const api = require('./routes/api');

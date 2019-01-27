@@ -19,9 +19,11 @@
   "homepage": "https://github.com/cory2067/webtaiko#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "hbs": "^4.0.1",
+    "nodesu": "^0.6.4",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "unzipper": "^0.9.10"

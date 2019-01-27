@@ -1,3 +1,5 @@
 function download(id) {
-  console.log(id);
+  fetch('/api/download/' + id).then((res) => {
+    console.log(res.json());
+  });
 }

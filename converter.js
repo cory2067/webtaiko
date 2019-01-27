@@ -1,6 +1,8 @@
 const fs = require('fs');
 const request = require('request');
 const unzipper = require('unzipper');
+const nodesu = new require('nodesu');
+const osu = new nodesu.Client(process.env.OSU_API_KEY);
 
 const parseMap = (text) => {
   const lines = text.split('\n').slice(1);
@@ -94,7 +96,10 @@ const convertMap = (mapData) => {
 
 
 async function main(mapId, outDir='out') {
-  console.log("Downloading osz...");
+  console.log("Looking up map info...");
+	const metadata = await osu.beatmaps.getBySetId(mapId);
+  
+  console.log("Downloading osz from Bloodcat...");
   const osz = await unzipper.Open.url(request, `https://bloodcat.com/osu/s/${mapId}`);
 
   let firstFile = true;
