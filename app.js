@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 const http = require('http');
 const bodyParser = require('body-parser');
 const express = require('express');
 const session = require('express-session');
-require('dotenv').config();
+const mongoose = require('mongoose');
 
 const views = require('./routes/views');
 const api = require('./routes/api');
@@ -14,6 +16,17 @@ app.set('view engine', 'hbs');
 // set POST request body parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// connect to db
+const url = process.env.MONGO_SRV;
+mongoose.connect(url, {useNewUrlParser: true}, function (err) {
+  if (err) {
+    console.log("MongoDB connection error:");
+    console.log(err);
+  } else {
+    console.log("MongoDB connected");
+  }
+});
 
 // set up sessions
 app.use(session({

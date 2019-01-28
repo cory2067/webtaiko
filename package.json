@@ -23,6 +23,7 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "hbs": "^4.0.1",
+    "mongoose": "^5.4.7",
     "nodesu": "^0.6.4",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
