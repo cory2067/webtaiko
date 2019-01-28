@@ -50,4 +50,8 @@ router.get('/maps', async function (req, res) {
   res.render('maps', {maps: maps});
 });
 
+router.get('/play/:mapid/:diff', function (req, res) {
+  res.sendFile('index.html', { root: 'views' });
+});
+
 module.exports = router;
