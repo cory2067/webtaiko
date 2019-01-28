@@ -59,6 +59,7 @@ const convertMap = (mapData) => {
     title: mapData.Metadata.Title,
     artist: mapData.Metadata.Artist,
     creator: mapData.Metadata.Creator,
+    diff: mapData.Metadata.Version,
     approachTime: 1000, // hardcoding this for now
     hits: []
   };
@@ -97,56 +98,74 @@ const convertMap = (mapData) => {
 
 async function main(mapId, outDir='out') {
   console.log("Looking up map info...");
-	const metadata = await osu.beatmaps.getBySetId(mapId);
+
+  // get all maps where mode==1 (taiko)
+  const mapset = (await osu.beatmaps.getBySetId(mapId)).filter(map => map.mode == 1);
+  const names = mapset.map(map => `[${map.version}].osu`);
   
   console.log("Downloading osz from Bloodcat...");
   const osz = await unzipper.Open.url(request, `https://bloodcat.com/osu/s/${mapId}`);
+  console.log("Extracting...");
+  
+  const mapfiles = osz.files.filter(file => names.some(n => file.path.endsWith(n)));
 
-  let firstFile = true;
-  console.log("Now converting...");
+  let mapdata = [];
+  for (const file of mapfiles) {
+    // Note: deliberately doing these synchonously
+    // since unzipper unpredictably breaks if you try to extract simultaneously
+    mapdata.push(await file.buffer());
+    console.log(`Loaded ${file.path}`);
+  }
 
-  osz.files.forEach(async (file, i) => {
-    if (!file.path.endsWith('.osu')) return;
+  console.log("Parsing maps...");
+  mapdata = mapdata.map(data => {
+    let out = parseMap(data.toString()); 
 
-    const content = await file.buffer();
-    const mapData = parseMap(content.toString()); 
-
-    if (firstFile) { // actions that occur once per mapset
-      firstFile = false;
-
-      // Extract beatmap audio
-      const audioName = mapData.General.AudioFilename;
-      const audioFile = osz.files.filter(f => f.path === audioName);
-      if (!audioFile.length) throw new Error("Could not find beatmap audio");
-
-      const namesplit = audioName.split('.');
-      const outPath = `${outDir}/${mapId}.${namesplit[namesplit.length - 1]}`;
-      
-      audioFile[0]
-        .stream()
-        .pipe(fs.createWriteStream(outPath))
-        .on('finish', () => {
-          console.log('--------------------');
-          console.log(`Saved map audio to ${outPath}`);
-        });
-    }
-    
-    // ignore non-taiko maps
-    if (mapData.General.Mode != 1) return;
-    
-    // Convert map to .tk (json) format
-    const out = convertMap(mapData);
-
-    const outPath = `${outDir}/${mapId}-${i}.tk`;
-    fs.writeFile(outPath, JSON.stringify(out), 'utf8', (err) => {
-      if (err)
-        console.log(err);
-      else
-        console.log('--------------------');
-        console.log(`Converted ${file.path}`);
-        console.log(`Saved to ${outPath}`);
-    });
+    // attach info about the map from osu api
+    out.api = mapset.filter(m => m.version == out.Metadata.Version)[0];
+    return out;
   });
+
+  // sort by difficulty
+  mapdata.sort((a, b) =>  {
+    return parseFloat(a.api.difficultyrating) - 
+           parseFloat(b.api.difficultyrating);
+  });
+
+  // Identify and extract beatmap audio
+  console.log("Extracting audio...");
+  const audioName = mapdata[0].General.AudioFilename;
+  const audioFile = osz.files.filter(file => file.path === audioName)[0];
+
+  if (!audioFile) {
+    throw new Error("Could not find beatmap audio");
+  }
+
+  const namesplit = audioName.split('.');
+  const audioOutPath = `${outDir}/${mapId}.${namesplit[namesplit.length - 1]}`;
+
+  await new Promise((resolve, reject) => {
+    audioFile
+      .stream()
+      .pipe(fs.createWriteStream(audioOutPath))
+      .on('finish', resolve)
+      .on('error', reject);
+  });
+
+  console.log('----------------------');
+  console.log(`Saved map audio to ${audioOutPath}`);
+
+  mapdata.forEach((data, i) => { 
+    const out = convertMap(data);
+    const outPath = `${outDir}/${mapId}-${i}.tk`;
+    fs.writeFileSync(outPath, JSON.stringify(out), 'utf8');
+    console.log('--------------------');
+    console.log(`Converted ${data.api.version}`);
+    console.log(`Saved to ${outPath}`);
+  });
+
+  console.log("Complete!");
+
 }
 
 // main(811216, '../public/maps')
