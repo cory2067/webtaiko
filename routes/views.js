@@ -1,9 +1,13 @@
 const express = require('express');
 const request = require('request-promise-native');
 const router = express.Router();
+const Beatmap = require('../models/beatmap');
 
 router.get('/', function (req, res) {
-  res.sendFile('index.html', { root: 'views' });
+  Beatmap.find({}, {hits: false}).sort({stars: 'asc'})
+    .then((maps) => {
+      res.render('index', { maps: maps });
+    });
 });
 
 router.get('/maps', async function (req, res) {
@@ -27,6 +31,7 @@ router.get('/maps', async function (req, res) {
     return;
   }
 
+  // parse bloodcat response
   const maps = []; // filtered
   for (const rawMap of rawMaps) {
     let map = {
@@ -39,11 +44,11 @@ router.get('/maps', async function (req, res) {
     map.beatmaps = rawMap.beatmaps.filter(diff => diff.mode == 1);
     map.beatmaps = map.beatmaps.map(diff => {
       return { 
-        name: diff.name,
-        star: Math.round(parseFloat(diff.star) * 100) / 100
+        diff: diff.name,
+        stars: Math.round(parseFloat(diff.star) * 100) / 100
       };
     });
-    map.beatmaps.sort((a, b) => a.star - b.star);
+    map.beatmaps.sort((a, b) => a.stars - b.stars);
     maps.push(map);
   }
 
@@ -51,7 +56,7 @@ router.get('/maps', async function (req, res) {
 });
 
 router.get('/play/:mapid/:diff', function (req, res) {
-  res.sendFile('index.html', { root: 'views' });
+  res.sendFile('play.html', { root: 'views' });
 });
 
 module.exports = router;

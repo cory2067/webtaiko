@@ -60,6 +60,7 @@ const convertMap = (mapData) => {
     artist: mapData.Metadata.Artist,
     creator: mapData.Metadata.Creator,
     diff: mapData.Metadata.Version,
+    stars: Math.round(mapData.api.difficultyrating*100)/100,
     approachTime: 1000, // hardcoding this for now
     hits: []
   };
@@ -155,17 +156,17 @@ async function main(mapId, outDir='out') {
   console.log('----------------------');
   console.log(`Saved map audio to ${audioOutPath}`);
 
-  mapdata.forEach((data, i) => { 
+  return mapdata.map((data, i) => { 
     const out = convertMap(data);
-    const outPath = `${outDir}/${mapId}-${i}.tk`;
-    fs.writeFileSync(outPath, JSON.stringify(out), 'utf8');
+    out.mapId = mapId;
+    out.diffId = i;
+    //const outPath = `${outDir}/${mapId}-${i}.tk`;
+    //fs.writeFileSync(outPath, JSON.stringify(out), 'utf8');
     console.log('--------------------');
     console.log(`Converted ${data.api.version}`);
-    console.log(`Saved to ${outPath}`);
+    //console.log(`Saved to ${outPath}`);
+    return out;
   });
-
-  console.log("Complete!");
-
 }
 
 // main(811216, '../public/maps')

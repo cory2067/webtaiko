@@ -44,7 +44,7 @@ PIXI.loader
 
 
 let mapData;
-$.getJSON(`/static/maps/${MAP_ID}-${DIFF}.tk`, (map) => {
+$.getJSON(`/api/beatmap/${MAP_ID}/${DIFF}`, (map) => {
   console.log("loaded tk");
   mapData = map;
 });
