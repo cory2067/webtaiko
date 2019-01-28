@@ -97,15 +97,15 @@ const convertMap = (mapData) => {
 }
 
 
-async function main(mapId, outDir='out') {
+async function main(setId, outDir='out') {
   console.log("Looking up map info...");
 
   // get all maps where mode==1 (taiko)
-  const mapset = (await osu.beatmaps.getBySetId(mapId)).filter(map => map.mode == 1);
+  const mapset = (await osu.beatmaps.getBySetId(setId)).filter(map => map.mode == 1);
   const names = mapset.map(map => `[${map.version}].osu`);
   
   console.log("Downloading osz from Bloodcat...");
-  const osz = await unzipper.Open.url(request, `https://bloodcat.com/osu/s/${mapId}`);
+  const osz = await unzipper.Open.url(request, `https://bloodcat.com/osu/s/${setId}`);
   console.log("Extracting...");
   
   const mapfiles = osz.files.filter(file => names.some(n => file.path.endsWith(n)));
@@ -143,7 +143,7 @@ async function main(mapId, outDir='out') {
   }
 
   const namesplit = audioName.split('.');
-  const audioOutPath = `${outDir}/${mapId}.${namesplit[namesplit.length - 1]}`;
+  const audioOutPath = `${outDir}/${setId}.${namesplit[namesplit.length - 1]}`;
 
   await new Promise((resolve, reject) => {
     audioFile
@@ -158,13 +158,12 @@ async function main(mapId, outDir='out') {
 
   return mapdata.map((data, i) => { 
     const out = convertMap(data);
-    out.mapId = mapId;
+    out.setId = setId;
     out.diffId = i;
-    //const outPath = `${outDir}/${mapId}-${i}.tk`;
-    //fs.writeFileSync(outPath, JSON.stringify(out), 'utf8');
+    // const outPath = `${outDir}/${setId}-${i}.tk`;
+    // fs.writeFileSync(outPath, JSON.stringify(out), 'utf8');
     console.log('--------------------');
     console.log(`Converted ${data.api.version}`);
-    //console.log(`Saved to ${outPath}`);
     return out;
   });
 }

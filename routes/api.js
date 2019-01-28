@@ -4,16 +4,16 @@ const router = express.Router();
 
 const Beatmap = require('../models/beatmap');
 
-router.get('/download/:mapId', function (req, res) {
-  converter(req.params.mapId, 'public/maps')
+router.get('/download/:setId', function (req, res) {
+  converter(req.params.setId, 'public/maps')
     .then(maps => Beatmap.insertMany(maps))
     .then(console.log)
     .catch(console.log)
   res.send({res: 'downloading'})
 });
 
-router.get('/beatmap/:mapId/:diffId', function (req, res) {
-  Beatmap.findOne({mapId: req.params.mapId, diffId: req.params.diffId})
+router.get('/beatmap/:setId/:diffId', function (req, res) {
+  Beatmap.findOne({setId: req.params.setId, diffId: req.params.diffId})
     .then(beatmap => {
       res.send(beatmap);
     }); 

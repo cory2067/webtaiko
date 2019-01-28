@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const BeatmapSchema = new mongoose.Schema ({
-  mapId         : Number,
+  setId         : Number,
   diffId        : Number,
   title         : String,
   artist        : String,

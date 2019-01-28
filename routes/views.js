@@ -55,7 +55,7 @@ router.get('/maps', async function (req, res) {
   res.render('maps', {maps: maps});
 });
 
-router.get('/play/:mapid/:diff', function (req, res) {
+router.get('/play/:setid/:diff', function (req, res) {
   res.sendFile('play.html', { root: 'views' });
 });
 
