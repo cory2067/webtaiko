@@ -3,9 +3,16 @@ const request = require('request-promise-native');
 const router = express.Router();
 const Beatmap = require('../models/beatmap');
 
+// used for UI coloring based on difficulty
+const diffColors = ['violet', 'blue', 'teal', 'green', 
+                   'yellow', 'orange', 'red'];
+
 router.get('/', function (req, res) {
   Beatmap.find({}, {hits: false}).sort({stars: 'asc'})
     .then((maps) => {
+      maps.forEach(map => { 
+        map.diffColor = diffColors[Math.floor(map.stars)] || 'black';
+      });
       res.render('index', { maps: maps });
     });
 });
@@ -45,7 +52,8 @@ router.get('/maps', async function (req, res) {
     map.beatmaps = map.beatmaps.map(diff => {
       return { 
         diff: diff.name,
-        stars: Math.round(parseFloat(diff.star) * 100) / 100
+        stars: Math.round(parseFloat(diff.star) * 100) / 100,
+        diffColor: diffColors[Math.floor(parseFloat(diff.star))] || 'black'
       };
     });
     map.beatmaps.sort((a, b) => a.stars - b.stars);

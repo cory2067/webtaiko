@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const hbs = require('hbs');
 
 const views = require('./routes/views');
 const api = require('./routes/api');
@@ -12,6 +13,7 @@ const api = require('./routes/api');
 // initialize express app
 const app = express();
 app.set('view engine', 'hbs');
+hbs.registerPartials(__dirname + '/views/partials');
 
 // set POST request body parser
 app.use(bodyParser.urlencoded({ extended: false }));

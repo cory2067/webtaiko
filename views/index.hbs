@@ -1,10 +1,42 @@
-{{#each maps}}
-  <div>
-    <a href="/play/{{this.setId}}/{{this.diffId}}">
-      {{this.artist}} -- {{this.title}}
-    </a>
-      <p> Mapped by {{this.creator}} </p>
-      <p>{{this.diff}}: {{this.stars}}*</p>
-    <hr>
+<head>
+  {{> head}}
+</head>
+
+<style>
+.map-seg {
+  cursor: pointer;
+}
+.map-seg:hover {
+  background-color: #f6f6f8;
+}
+</style>
+
+<script>
+function play(setId, diffId) {
+  window.location = `/play/${setId}/${diffId}`;
+}
+</script>
+
+<body>
+  <div class="ui text container">
+      <h1 class="ui dividing header">webtaiko</h1>
+ 
+      {{#each maps}}
+      <div class="ui {{this.diffColor}} segment map-seg"
+           onclick="play({{this.setId}},{{this.diffId}})">
+        <div class="ui header">
+          {{this.title}}
+          <div class="sub header"> {{this.artist}} // map by {{this.creator}} </div>
+        </div>
+      
+        <div class="ui big header">
+          {{this.diff}} </span><span class="ui {{this.diffColor}} big circular label">
+          <i class="star icon"></i> 
+          {{this.stars}}
+        </div>
+      </div>
+      {{/each}}
+      
+
   </div>
-{{/each}}
+</body>
