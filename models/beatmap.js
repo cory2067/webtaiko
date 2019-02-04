@@ -9,6 +9,7 @@ const BeatmapSchema = new mongoose.Schema ({
   diff          : String,
   stars         : Number,
   approachTime  : Number,
+  plays         : Number,
   hits          : [[Number]]
 });
 

@@ -20,6 +20,9 @@
   overflow-y: scroll;
   height: calc(100% - 7.2em);
 }
+#play-button {
+  float: right;
+}
 </style>
 
 <body>
@@ -32,11 +35,27 @@
 
             <h1 class="ui header">
               <span id="scores-artist">artist</span> -- <span id="scores-title">title</span>
-              <div class="sub header">Map by <span id="scores-creator">creator</span><span class="ui big circular label" id="scores-star-label">
-              <i class="star icon"></i> 
-              <span id="scores-stars">0.00</span>
+                <div class="sub header">Map by <span id="scores-creator">creator</span></div>
             </h1>
 
+            <div class="ui big header">
+              <span id="scores-diff">diff</span>
+              <span id="scores-star-label" class="ui big circular label">
+                <i class="star icon"></i> 
+                <span id="scores-stars">0.00</span>
+              </span>
+
+              <div class="ui labeled button" id="play-button">
+                <div class="positive ui button">
+                  <i class="play icon"></i> Play
+                </div>
+                <a id="scores-plays" class="ui basic green left pointing label">
+                  0
+                </a>
+              </div>
+            </div>
+
+             
             <div class="ui section divider"></div>
 
             <div class="ui medium header">Personal Best:</div>
@@ -102,9 +121,9 @@
               </div>
             
               <div class="ui big header">
-                {{this.diff}} </span><span class="ui {{this.diffColor}} big circular label">
+                {{this.diff}} <span class="ui {{this.diffColor}} big circular label">
                 <i class="star icon"></i> 
-                {{this.stars}}
+                {{this.stars}}</span>
               </div>
             </div>
             {{/each}}
