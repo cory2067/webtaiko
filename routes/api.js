@@ -12,6 +12,13 @@ router.get('/download/:setId', function (req, res) {
   res.send({res: 'downloading'})
 });
 
+router.get('/scores/:setId/:diffId', function (req, res) {
+  Beatmap.findOne({setId: req.params.setId, diffId: req.params.diffId}, {hits: false})
+    .then(beatmap => {
+      res.send(beatmap.toObject({virtuals: true}));
+    }); 
+});
+
 router.get('/beatmap/:setId/:diffId', function (req, res) {
   Beatmap.findOne({setId: req.params.setId, diffId: req.params.diffId})
     .then(beatmap => {

@@ -3,17 +3,12 @@ const request = require('request-promise-native');
 const router = express.Router();
 const Beatmap = require('../models/beatmap');
 
-// used for UI coloring based on difficulty
-const diffColors = ['violet', 'blue', 'teal', 'green', 
-                   'yellow', 'orange', 'red'];
-
 router.get('/', function (req, res) {
   Beatmap.find({}, {hits: false}).sort({stars: 'asc'})
     .then((maps) => {
-      maps.forEach(map => { 
-        map.diffColor = diffColors[Math.floor(map.stars)] || 'black';
-      });
-      res.render('index', { maps: maps });
+      // convert mongoose doc to plain object
+      const rawMaps = maps.map(m => m.toObject({virtuals: true}));
+      res.render('index', {maps: rawMaps});
     });
 });
 
@@ -53,7 +48,6 @@ router.get('/maps', async function (req, res) {
       return { 
         diff: diff.name,
         stars: Math.round(parseFloat(diff.star) * 100) / 100,
-        diffColor: diffColors[Math.floor(parseFloat(diff.star))] || 'black'
       };
     });
     map.beatmaps.sort((a, b) => a.stars - b.stars);

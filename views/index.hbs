@@ -18,15 +18,9 @@
 }
 #map-select {
   overflow-y: scroll;
-  height: calc(100% - 6.2em);
+  height: calc(100% - 7.2em);
 }
 </style>
-
-<script>
-function play(setId, diffId) {
-  window.location = `/play/${setId}/${diffId}`;
-}
-</script>
 
 <body>
   <div class="ui segment">
@@ -37,15 +31,11 @@ function play(setId, diffId) {
           <div class="column">
 
             <h1 class="ui header">
-              KurousaP - Senbonzakura
-              <div class="sub header">Map by Firce777</div>
-            </h1>
-           
-            <div class="ui big header">
-              Nardo's Oni </span><span class="ui teal big circular label">
+              <span id="scores-artist">artist</span> -- <span id="scores-title">title</span>
+              <div class="sub header">Map by <span id="scores-creator">creator</span><span class="ui big circular label" id="scores-star-label">
               <i class="star icon"></i> 
-              6.88
-            </div>
+              <span id="scores-stars">0.00</span>
+            </h1>
 
             <div class="ui section divider"></div>
 
@@ -104,7 +94,8 @@ function play(setId, diffId) {
 
             {{#each maps}}
             <div class="ui {{this.diffColor}} segment map-seg"
-                 onclick="play({{this.setId}},{{this.diffId}})">
+                 onclick="load({{this.setId}},{{this.diffId}})">
+
               <div class="ui header">
                 {{this.title}}
                 <div class="sub header"> {{this.artist}} // map by {{this.creator}} </div>
@@ -125,3 +116,5 @@ function play(setId, diffId) {
 
   </div>
 </body>
+
+<script src="/static/js/index.js"></script>

@@ -12,4 +12,11 @@ const BeatmapSchema = new mongoose.Schema ({
   hits          : [[Number]]
 });
 
+BeatmapSchema.virtual('diffColor').get(function () {
+  const diffColors = ['violet', 'blue', 'teal', 'green',
+                     'yellow', 'orange', 'red'];
+
+  return diffColors[Math.floor(this.stars)] || 'black';
+});
+
 module.exports = mongoose.model('Beatmap', BeatmapSchema);
