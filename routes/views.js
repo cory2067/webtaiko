@@ -57,8 +57,12 @@ router.get('/maps', async function (req, res) {
   res.render('maps', {maps: maps});
 });
 
-router.get('/play/:setid/:diff', function (req, res) {
-  res.sendFile('play.html', { root: 'views' });
+router.get('/play/:setId/:diffId', function (req, res) {
+  Beatmap.findOneAndUpdate({setId: req.params.setId, diffId: req.params.diffId}, {$inc: {plays: 1}})
+    .then(beatmap => {
+      if (!beatmap) return res.sendStatus(404);
+      res.sendFile('play.html', { root: 'views' });
+    });
 });
 
 module.exports = router;

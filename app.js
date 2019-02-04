@@ -21,6 +21,7 @@ app.use(bodyParser.json());
 
 // connect to db
 const url = process.env.MONGO_SRV;
+mongoose.set('useFindAndModify', false);
 mongoose.connect(url, {useNewUrlParser: true}, function (err) {
   if (err) {
     console.log("MongoDB connection error:");
