@@ -283,4 +283,8 @@ class Track {
     this.circles.removeChildAt(0); 
     return { type: "normal", acc: acc };
   }
+
+  empty() {
+    return this.circles.children.length === 0; 
+  }
 } 

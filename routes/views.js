@@ -65,4 +65,8 @@ router.get('/play/:setId/:diffId', function (req, res) {
     });
 });
 
+router.get('/score/:scoreId', function (req, res) {
+  res.send('meme');
+});
+
 module.exports = router;

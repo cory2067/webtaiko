@@ -9,6 +9,8 @@ const keymap = {
   d:1,f:0,j:0,k:1
 }
 
+const accLabels = {0: 'miss', 25: 'bad', 50: 'good', 100: 'perfect'};
+
 // tracks all gameplay objects and score indicators
 class Gameplay {
   constructor(audio, mapData) {
@@ -30,6 +32,10 @@ class Gameplay {
     this.scoreText.y = 500;
     this.container.addChild(this.scoreText);
 
+    // keep track of number of each hit
+    this.hits = {miss: 0, bad: 0, good: 0, perfect: 0};
+    this.submittedScore = false;
+
     // accuracy percent is accValue/hitObjects
     this.accValue = 0;
     this.hitObjects = 0;
@@ -38,6 +44,7 @@ class Gameplay {
     this.container.addChild(this.accText);
 
     this.combo = 0;
+    this.maxCombo = 0; // max combo achieved 
     this.comboText = new PIXI.Text("Combo: 0", new PIXI.TextStyle({fill: "white"}));
     this.comboText.y = 600;
     this.container.addChild(this.comboText);
@@ -50,8 +57,8 @@ class Gameplay {
     let combo = 0;
     for (const circle of this.map.hits) {
       if (circle[1] <= 4) {
-        this.maxScore += this.getHitScore(combo, 100);
         combo++;
+        this.maxScore += this.getHitScore(combo, 100);
       }
     }
 
@@ -71,7 +78,7 @@ class Gameplay {
 
   // overall accuracy on map
   getOverallAccuracy() {
-      return this.accValue / this.hitObjects;
+      return Math.round(100 * this.accValue / this.hitObjects) / 100;
   }
 
   // score for a single hitcircle, given acc for that one circle
@@ -89,6 +96,7 @@ class Gameplay {
       sounds["/static/sound/combobreak.wav"].play();
     this.combo = 0; 
     this.rawScore *= 0.98**misses;
+    this.hits[accLabels[0]] += misses;
     this.track.updateIndicator(this.time(), 0);
   }
 
@@ -107,7 +115,9 @@ class Gameplay {
       case "normal":
         this.hitObjects++;
         this.accValue += hit.acc;
+        this.hits[accLabels[hit.acc]]++;
         this.combo++;
+        this.maxCombo = Math.max(this.maxCombo, this.combo);
         this.rawScore += this.getHitScore(this.combo, hit.acc);
         this.track.updateIndicator(this.time(), hit.acc);
         break;
@@ -137,6 +147,27 @@ class Gameplay {
       this.registerMiss(missedCircles);
     }
 
+    if (this.cursor >= this.map.hits.length && this.track.empty() && !this.submittedScore) {
+      this.submittedScore = true;
+      fetch('/api/score', {
+        method: 'post',
+        headers: {'Content-type': 'application/json'},
+        body: JSON.stringify({
+          setId: SET_ID,
+          diffId: DIFF_ID,
+          score: this.getTotalScore(),
+          player: 'Cychloryn',
+          maxCombo: this.maxCombo,
+          acc: this.getOverallAccuracy(),
+          hits: this.hits
+        })
+      }).then(res => res.json())
+        .then(res => {
+          console.log("Submitted score!");
+          window.location = `/score/${res._id}`;
+        });
+    }
+
     // spawn new hitcircles
     while (this.cursor < this.map.hits.length && (this.map.hits[this.cursor][0] - this.map.approachTime) < t) {
       // circle[0]: time (ms) when circle should be hit
@@ -159,7 +190,7 @@ class Gameplay {
     this.scoreText.text = "Score: " + this.getTotalScore();
     this.comboText.text = "Combo: " + this.combo;
     if (this.hitObjects) {
-      this.accText.text = "Acc: " + Math.round(100 * this.getOverallAccuracy()) / 100 + "%";
+      this.accText.text = "Acc: " + this.getOverallAccuracy() + "%";
     }
   }
 }

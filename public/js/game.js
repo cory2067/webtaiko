@@ -3,8 +3,8 @@ if (params.length < 4) {
   alert("ERROR bad path");
 }
 
-const MAP_ID = params[2];
-const DIFF = params[3];
+const SET_ID = parseInt(params[2]);
+const DIFF_ID = parseInt(params[3]);
 
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
@@ -44,13 +44,13 @@ PIXI.loader
 
 
 let mapData;
-$.getJSON(`/api/beatmap/${MAP_ID}/${DIFF}`, (map) => {
+$.getJSON(`/api/beatmap/${SET_ID}/${DIFF_ID}`, (map) => {
   console.log("loaded tk");
   mapData = map;
 });
 
 sounds.load([
-  `/static/maps/${MAP_ID}.mp3`,
+  `/static/maps/${SET_ID}.mp3`,
   "/static/sound/hit-center.wav",
   "/static/sound/hit-rim.wav",
   "/static/sound/combobreak.wav"
@@ -58,7 +58,7 @@ sounds.load([
 
 let gameplay;
 sounds.whenLoaded = () => {
-  gameplay = new Gameplay(`/static/maps/${MAP_ID}.mp3`, mapData);
+  gameplay = new Gameplay(`/static/maps/${SET_ID}.mp3`, mapData);
   gameplay.start();
   app.stage.addChild(gameplay.container);
   app.ticker.add(gameplay.updateTrack.bind(gameplay));
