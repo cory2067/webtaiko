@@ -16,4 +16,13 @@ const ScoreSchema = new mongoose.Schema ({
   }
 });
 
+ScoreSchema.methods.findRank = function () {
+  return this.model('Score').countDocuments({
+		setId: this.setId,
+		mapId: this.mapId,
+    best: true, 
+    score: {$gte: this.score}
+  });
+};
+
 module.exports = mongoose.model('Score', ScoreSchema);
